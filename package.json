@@ -1,0 +1,26 @@
+{
+  "name": "suman-gyan",
+  "version": "1.0.0",
+  "description": "Suman Gyan - a personal tutor app for Indian students from Class 1 to 12.",
+  "main": "index.js",
+  "scripts": {
+    "build": "mkdir -p www && cp index.html manifest.json service-worker.js www/ && cp -r icons www/icons",
+    "sync": "npm run build && cap sync",
+    "android": "npm run build && cap sync android && cap open android",
+    "ios": "npm run build && cap sync ios && cap open ios",
+    "start": "npm run build && npx serve www"
+  },
+  "keywords": ["education", "capacitor", "tutor", "india"],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/camera": "^6.0.2",
+    "@capacitor/splash-screen": "^6.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/ios": "^6.1.2"
+  }
+}

@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Suman Gyan — Your Personal Tutor</title>
+<meta name="description" content="Suman Gyan is a personal tutor app for Indian students from Class 1 to 12 — Geography, History, Mathematics, General Knowledge and an AI tutor.">
+<!-- PWA / store metadata: see manifest.json in the store-ready package -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1B2A4A">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon_192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon_512.png">
+<!-- Apple: home-screen install + status bar appearance -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Suman Gyan">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon_180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A4A;
+    --ink-soft:#324066;
+    --marigold:#F4A93C;
+    --marigold-deep:#E08A1B;
+    --paper:#FBF3E1;
+    --paper-deep:#F3E7CB;
+    --peacock:#0E6E5A;
+    --peacock-deep:#0A5346;
+    --maroon:#8C2F39;
+    --maroon-deep:#712330;
+    --text:#2B2620;
+    --text-soft:#5B5346;
+    --err:#C1443B;
+    --line:#E4D6B4;
+    --white:#FFFDF8;
+    --radius:16px;
+    --shadow: 0 8px 24px rgba(27,42,74,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible{
+    outline:3px solid #0E6E5A; outline-offset:2px;
+  }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  body{
+    font-family:'Karla',sans-serif;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(244,169,60,0.08), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(14,110,90,0.08), transparent 40%),
+      #E9E1CC;
+    background-image:
+      radial-gradient(circle, rgba(27,42,74,0.05) 1px, transparent 1px),
+      radial-gradient(circle at 20% 10%, rgba(244,169,60,0.10), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(14,110,90,0.10), transparent 40%);
+    background-size: 18px 18px, auto, auto;
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:20px 10px;
+  }
+  h1,h2,h3,h4{font-family:'Fraunces',serif; margin:0; color:var(--ink); letter-spacing:-0.01em;}
+  p{margin:0;}
+  button{font-family:'Karla',sans-serif; cursor:pointer;}
+  ::selection{background:var(--marigold); color:var(--ink);}
+
+  /* ---------- Phone frame ---------- */
+  #frame{
+    width:430px;
+    max-width:100%;
+    height:900px;
+    max-height:94vh;
+    background:var(--paper);
+    border-radius:34px;
+    box-shadow: 0 30px 60px rgba(27,42,74,0.35), 0 0 0 10px #14203a, 0 0 0 11px #3a4a72;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  #screenArea{
+    flex:1;
+    overflow-y:auto;
+    position:relative;
+    scrollbar-width:thin;
+  }
+  #screenArea::-webkit-scrollbar{width:6px;}
+  #screenArea::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+
+  .page{ padding:22px 20px 100px 20px; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){ .page{animation:none;} }
+
+  /* ---------- Logo ---------- */
+  .logo-badge{ display:inline-flex; align-items:center; justify-content:center; }
+  .wordmark{ font-family:'Fraunces',serif; font-weight:600; }
+  .wordmark .suman{ color:var(--ink); }
+  .wordmark .gyan{ color:var(--marigold-deep); }
+
+  /* ---------- Splash ---------- */
+  #splash{
+    position:absolute; inset:0; background:var(--ink);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+    z-index:50;
+  }
+  #splash .tag{ color:#D9C9A0; font-size:14px; letter-spacing:0.02em; }
+  #splash .wordmark{ font-size:30px; }
+  #splash .wordmark .suman{ color:var(--white); }
+
+  /* ---------- Buttons & inputs ---------- */
+  .btn{
+    border:none; border-radius:12px; padding:13px 18px; font-weight:700; font-size:15px;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-primary{ background:var(--marigold); color:var(--ink); box-shadow:0 4px 0 var(--marigold-deep); }
+  .btn-primary:active{ box-shadow:0 1px 0 var(--marigold-deep); transform:translateY(3px) scale(0.99); }
+  .btn-outline{ background:transparent; color:var(--ink); border:2px solid var(--ink); }
+  .btn-peacock{ background:var(--peacock); color:var(--white); box-shadow:0 4px 0 var(--peacock-deep); }
+  .btn-peacock:active{ box-shadow:0 1px 0 var(--peacock-deep); transform:translateY(3px) scale(0.99); }
+  .btn-block{ width:100%; display:block; text-align:center; }
+  .btn-sm{ padding:8px 14px; font-size:13px; border-radius:9px; }
+  .btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:6px; }
+  .field input, .field select, .field textarea{
+    width:100%; padding:12px 14px; border-radius:11px; border:1.5px solid var(--line);
+    background:var(--white); font-family:'Karla',sans-serif; font-size:14.5px; color:var(--text);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none; border-color:var(--peacock);
+  }
+  .error-msg{ color:var(--err); font-size:12.5px; margin-top:8px; font-weight:600; }
+  .hint{ color:var(--text-soft); font-size:12.5px; }
+
+  /* ---------- Auth ---------- */
+  #authScreen{ padding:34px 26px; min-height:100%; }
+  .auth-toggle{ display:flex; background:var(--paper-deep); border-radius:12px; padding:4px; margin:22px 0 20px 0; }
+  .auth-toggle button{ flex:1; padding:10px; border:none; background:transparent; border-radius:9px; font-weight:700; color:var(--text-soft); }
+  .auth-toggle button.active{ background:var(--ink); color:var(--white); }
+
+  /* ---------- Header (in app) ---------- */
+  #appHeader{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 18px; background:var(--ink); color:var(--white);
+    position:sticky; top:0; z-index:10;
+  }
+  .grade-pill{ background:rgba(255,255,255,0.15); padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:700; }
+  .offline-banner{
+    background:var(--maroon); color:var(--white); font-size:12.5px; font-weight:600;
+    padding:9px 18px; display:flex; align-items:center; gap:8px;
+  }
+  .offline-dot{width:7px; height:7px; border-radius:50%; background:#ffb4a8; flex:none;}
+
+  /* ---------- Bottom nav ---------- */
+  #bottomNav{
+    display:flex; background:var(--white); border-top:1.5px solid var(--line);
+    padding:8px 4px calc(env(safe-area-inset-bottom, 8px)); position:relative; z-index:20;
+  }
+  .nav-btn{
+    flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:6px 2px; color:var(--text-soft); font-size:10.5px; font-weight:700; border-radius:10px;
+  }
+  .nav-btn.active{ color:var(--peacock-deep); }
+  .nav-btn svg{ width:20px; height:20px; }
+
+  /* ---------- Cards / common ---------- */
+  .section-title{ font-size:21px; margin-bottom:4px; }
+  .section-sub{ color:var(--text-soft); font-size:13.5px; margin-bottom:18px; }
+  .card{
+    background:var(--white); border-radius:var(--radius); padding:16px; margin-bottom:14px;
+    box-shadow:var(--shadow); border:1px solid var(--line);
+  }
+  .subject-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .subject-card{
+    border-radius:16px; padding:16px 14px; color:var(--white); position:relative; overflow:hidden;
+    min-height:104px; display:flex; flex-direction:column; justify-content:space-between; border:none; text-align:left;
+  }
+  .subject-card .icon{ width:26px; height:26px; }
+  .subject-card .name{ font-family:'Fraunces',serif; font-weight:600; font-size:15.5px; }
+  .chip{ display:inline-block; padding:5px 11px; border-radius:20px; font-size:12px; font-weight:700; background:var(--paper-deep); color:var(--ink-soft); margin:0 6px 8px 0; border:none;}
+  .chip.active{ background:var(--ink); color:var(--white); }
+  .progress-track{ height:7px; background:var(--paper-deep); border-radius:4px; overflow:hidden; margin-top:8px;}
+  .progress-fill{ height:100%; background:var(--peacock); border-radius:4px; }
+
+  /* ---------- Timeline (history) ---------- */
+  .timeline{ position:relative; margin-left:10px; padding-left:22px; border-left:2.5px solid var(--paper-deep); }
+  .tl-item{ position:relative; margin-bottom:6px; }
+  .tl-item::before{
+    content:''; position:absolute; left:-28.5px; top:4px; width:12px; height:12px; border-radius:50%;
+    background:var(--maroon); border:3px solid var(--paper);
+  }
+  .tl-date{ font-weight:800; color:var(--maroon); font-size:13px; }
+  .tl-title{ font-family:'Fraunces',serif; font-size:16.5px; margin:2px 0 6px 0; }
+  .tl-body{ font-size:13.5px; line-height:1.55; color:var(--text-soft); display:none; }
+  .tl-item.open .tl-body{ display:block; }
+  .tl-toggle{ background:none; border:none; color:var(--peacock-deep); font-weight:700; font-size:12.5px; padding:0; margin-bottom:16px; }
+
+  /* ---------- Geography map ---------- */
+  .map-wrap{
+    background:linear-gradient(180deg,#0B2540 0%, #123A5C 55%, #0E6E5A 100%);
+    border-radius:16px; padding:14px; position:relative; overflow:hidden;
+  }
+  .map-wrap svg{ width:100%; height:auto; display:block; }
+  .map-region{ cursor:pointer; transition:filter .15s ease, opacity .15s ease; }
+  .map-region:hover, .map-region.selected{ filter:brightness(1.35) drop-shadow(0 0 6px rgba(244,169,60,0.9)); }
+  .map-label{ font-family:'Karla',sans-serif; font-size:9px; fill:#F3E7CB; font-weight:700; pointer-events:none; }
+  .map-star{ pointer-events:none; }
+  .fact-pop{
+    background:var(--white); border-radius:12px; padding:14px; margin-top:12px; border:1px solid var(--line);
+    display:none;
+  }
+  .fact-pop.show{ display:block; animation:fadeIn .25s ease; }
+
+  /* ---------- Chat / tutor ---------- */
+  .chat-scroll{ display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+  .msg{ padding:11px 14px; border-radius:14px; font-size:13.8px; line-height:1.5; max-width:85%; white-space:pre-wrap; }
+  .msg.user{ background:var(--ink); color:var(--white); align-self:flex-end; border-bottom-right-radius:3px; }
+  .msg.bot{ background:var(--white); border:1px solid var(--line); align-self:flex-start; border-bottom-left-radius:3px; }
+  .chat-input-row{ display:flex; gap:8px; position:sticky; bottom:0; background:var(--paper); padding-top:6px; }
+  .chat-input-row input{ flex:1; }
+  .typing{ display:flex; gap:4px; padding:6px 2px; }
+  .typing span{ width:6px; height:6px; border-radius:50%; background:var(--text-soft); animation:bounce 1s infinite; }
+  .typing span:nth-child(2){ animation-delay:.15s; } .typing span:nth-child(3){ animation-delay:.3s; }
+  @keyframes bounce{ 0%,60%,100%{transform:translateY(0);} 30%{transform:translateY(-5px);} }
+
+  /* ---------- Calculator ---------- */
+  .calc-display{ background:var(--ink); color:var(--white); border-radius:12px; padding:16px; font-family:'Fraunces',serif; font-size:22px; margin-bottom:12px; min-height:28px; word-break:break-all;}
+  .steps-list{ counter-reset:step; list-style:none; padding:0; margin:0; }
+  .steps-list li{ counter-increment:step; padding:10px 0 10px 34px; position:relative; border-bottom:1px dashed var(--line); font-size:13.8px; line-height:1.5;}
+  .steps-list li:last-child{ border-bottom:none; }
+  .steps-list li::before{
+    content:counter(step); position:absolute; left:0; top:9px; width:22px; height:22px; border-radius:50%;
+    background:var(--marigold); color:var(--ink); font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ---------- Solver upload ---------- */
+  .upload-box{
+    border:2px dashed var(--line); border-radius:16px; padding:26px 14px; text-align:center; background:var(--white);
+  }
+  .preview-img{ max-width:100%; border-radius:12px; margin-top:12px; border:1px solid var(--line); }
+
+  .banner-info{ background:#EAF4F1; border:1px solid #BFE0D6; color:var(--peacock-deep); font-size:12.5px; font-weight:600; padding:10px 12px; border-radius:10px; margin-bottom:14px;}
+  .banner-warn{ background:#FBE9E5; border:1px solid #F0BEB3; color:var(--maroon-deep); font-size:12.5px; font-weight:600; padding:10px 12px; border-radius:10px; margin-bottom:14px;}
+
+  .empty-note{ text-align:center; color:var(--text-soft); font-size:13px; padding:30px 10px; }
+  .link-btn{ background:none; border:none; color:var(--peacock-deep); font-weight:700; font-size:13px; padding:0; }
+  .row{ display:flex; align-items:center; justify-content:space-between; }
+  .small{ font-size:12px; }
+  .mt8{margin-top:8px;} .mt12{margin-top:12px;} .mt16{margin-top:16px;} .mb0{margin-bottom:0;}
+</style>
+</head>
+<body>
+
+<div id="frame">
+  <div id="splash">
+    <div class="logo-badge" id="splashLogo"></div>
+    <div class="wordmark"><span class="suman">Suman</span> <span class="gyan" style="color:#F4A93C;">Gyan</span></div>
+    <div class="tag">Your personal tutor, from Class 1 to 12</div>
+  </div>
+
+  <div id="appHeader" style="display:none;"></div>
+  <div id="offlineBanner"></div>
+  <div id="screenArea"></div>
+  <div id="bottomNav" style="display:none;"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+<script>
+/* =========================================================
+   SUMAN GYAN — app state & data
+   ========================================================= */
+const LOGO_SVG = (size=64) => `
+<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="48" fill="#1B2A4A"/>
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#F4A93C" stroke-width="2" opacity="0.6"/>
+  <path d="M22 66 C22 54, 35 50, 50 50 C65 50, 78 54, 78 66 C78 74, 66 78, 50 78 C34 78, 22 74, 22 66 Z" fill="#0E6E5A"/>
+  <path d="M27 65 C27 58, 37 55, 50 55 C63 55, 73 58, 73 65" fill="none" stroke="#F3E7CB" stroke-width="1.5" opacity="0.5"/>
+  <path d="M50 50 C46 40, 48 30, 50 22 C52 30, 54 40, 50 50 Z" fill="#F4A93C"/>
+  <path d="M50 44 C48 38, 49 32, 50 27 C51 32, 52 38, 50 44 Z" fill="#FFE9BE"/>
+  <circle cx="50" cy="66" r="3" fill="#F3E7CB"/>
+</svg>`;
+
+const state = {
+  screen: 'splash',
+  authMode: 'login',
+  authError: '',
+  user: null,
+  users: {
+    'demo@sumangyan.app': { name:'Aditi Sharma', email:'demo@sumangyan.app', password:'demo1234', grade:'8' }
+  },
+  activeTab: 'home',
+  offline: false,
+  progress: { geography: 40, history: 25, mathematics: 60, gk: 15 },
+  tutorMessages: [],
+  tutorLoading: false,
+  gkExtra: null,
+  gkLoading: false,
+  gkError: '',
+  gkCategory: 'All',
+  calcExpr: '',
+  calcResult: null,
+  calcSteps: null,
+  calcLoading: false,
+  calcError: '',
+  solverImage: null,
+  solverContext: '',
+  solverAnswer: null,
+  solverLoading: false,
+  solverError: '',
+  mapSelection: {},
+};
+
+const GRADE_LABELS = {
+  '1':'Class 1 · Primary', '2':'Class 2 · Primary', '3':'Class 3 · Primary', '4':'Class 4 · Primary', '5':'Class 5 · Primary',
+  '6':'Class 6 · Middle', '7':'Class 7 · Middle', '8':'Class 8 · Middle',
+  '9':'Class 9 · Secondary', '10':'Class 10 · Secondary',
+  '11':'Class 11 · Sr. Secondary', '12':'Class 12 · Sr. Secondary',
+};
+
+/* ---------- Content data ---------- */
+const WORLD_FACTS = {
+  'Asia': 'The largest and most populous continent, home to the Himalayas, the world\'s highest mountain range, and countries like India and China.',
+  'Africa': 'The second-largest continent, home to the Sahara — the largest hot desert — and the longest river in the world, the Nile.',
+  'Europe': 'A continent of many small countries with a long coastline; the Alps and the Danube river are among its best-known features.',
+  'North America': 'Home to the Rockies, the Great Lakes, and countries such as Canada, the USA, and Mexico.',
+  'South America': 'Home to the Amazon rainforest and the Amazon River, which carries more water than any other river on Earth.',
+  'Australia': 'The smallest continent and also a single country, known for the Great Barrier Reef and unique animals like kangaroos.',
+  'Antarctica': 'The coldest, driest, and windiest continent, almost entirely covered by a thick sheet of ice.'
+};
+const INDIA_FACTS = {
+  'Delhi': 'The national capital of India, home to landmarks like the Red Fort, India Gate, and the Parliament House.',
+  'Mumbai': 'The capital of Maharashtra and India\'s financial hub, home to the Bombay Stock Exchange and Bollywood.',
+  'Kolkata': 'The capital of West Bengal, once the capital of British India, known as the "City of Joy".',
+  'Chennai': 'The capital of Tamil Nadu, a major port city on the Bay of Coast of Coromandel known for its classical dance and music.',
+  'Bengaluru': 'The capital of Karnataka, called the "Silicon Valley of India" for its large technology industry.',
+  'Jaipur': 'The capital of Rajasthan, known as the "Pink City" for the colour of its old city buildings.',
+  'Bhopal': 'The capital of Madhya Pradesh, a state that lies almost exactly at the geographic centre of India.',
+  'Guwahati': 'The largest city in Assam and the gateway to India\'s scenic North-Eastern states.'
+};
+const PHYSICAL_FACTS = {
+  'Himalayas': 'A young fold mountain range along India\'s northern border, home to Mount Everest and the source of major rivers like the Ganga.',
+  'Thar Desert': 'A large arid desert in Rajasthan and Gujarat, also called the Great Indian Desert.',
+  'Ganga Basin': 'The fertile plain formed by the river Ganga, one of the most densely populated regions on Earth.',
+  'Deccan Plateau': 'A large plateau covering most of southern India, formed by ancient volcanic activity millions of years ago.',
+  'Western Ghats': 'A mountain range along India\'s western coast, recognised as a UNESCO World Heritage biodiversity hotspot.'
+};
+
+const HISTORY_ERAS = {
+  'Ancient India': [
+    {date:'c. 2500 BCE', title:'The Indus Valley Civilisation', body:'Along the banks of the Indus river, cities like Harappa and Mohenjo-daro rose with planned streets, covered drains, and public baths — remarkable for their time. Seals with an undeciphered script and toys shaped like carts suggest a trading, inventive people.'},
+    {date:'c. 563 BCE', title:'Birth of Gautama Buddha', body:'Born a prince in Lumbini, Siddhartha Gautama left his palace to search for the cause of suffering. Under a Bodhi tree in Bodh Gaya, he found enlightenment and began teaching the Four Noble Truths, founding Buddhism.'},
+    {date:'321 BCE', title:'Chandragupta Maurya founds an empire', body:'Guided by his advisor Chanakya, Chandragupta united much of the subcontinent into the Mauryan Empire, one of the largest empires in ancient India, later ruled by his grandson Ashoka.'},
+    {date:'c. 260 BCE', title:'Ashoka and the Kalinga War', body:'After witnessing the bloodshed of the Kalinga War, Emperor Ashoka renounced violence and embraced Buddhism, spreading messages of peace and tolerance on stone edicts across his empire.'}
+  ],
+  'Medieval India': [
+    {date:'1192', title:'Battle of Tarain', body:'Muhammad of Ghor defeated Prithviraj Chauhan, opening the path for the establishment of the Delhi Sultanate, which would rule northern India for over three centuries.'},
+    {date:'1398', title:'Timur invades Delhi', body:'The Central Asian conqueror Timur sacked Delhi, weakening the Sultanate and leading to a period of regional kingdoms rising in its place.'},
+    {date:'1526', title:'First Battle of Panipat', body:'Babur defeated Ibrahim Lodi using gunpowder and cannons for the first time in Indian warfare, founding the Mughal Empire.'},
+    {date:'1600', title:'The East India Company is formed', body:'A group of English merchants received a royal charter to trade with Asia. What began as a trading company would, over the next two centuries, grow into a ruling power in India.'}
+  ],
+  'Modern India': [
+    {date:'1857', title:'The Revolt of 1857', body:'Sparked by the introduction of cartridges rumoured to be greased with animal fat, soldiers in Meerut rebelled. The uprising spread across northern India and is remembered as India\'s First War of Independence.'},
+    {date:'1919', title:'The Jallianwala Bagh Massacre', body:'On Baisakhi day in Amritsar, British troops under General Dyer fired on an unarmed crowd gathered in a walled garden, killing hundreds. The massacre shocked the nation and hardened the resolve for freedom.'},
+    {date:'1930', title:'The Salt March', body:'Mahatma Gandhi walked 240 miles from Sabarmati to Dandi to make salt from seawater, defying the British salt tax through peaceful civil disobedience — a turning point in the freedom movement.'},
+    {date:'15 August 1947', title:'Independence Day', body:'At midnight, Jawaharlal Nehru delivered his "Tryst with Destiny" speech as India became a free nation after nearly 200 years of colonial rule.'},
+    {date:'26 January 1950', title:'The Constitution comes into force', body:'India adopted its Constitution, drafted under the guidance of Dr. B. R. Ambedkar, becoming a sovereign, democratic republic.'}
+  ],
+  'World History': [
+    {date:'776 BCE', title:'The First Olympic Games', body:'Held in Olympia, Greece, in honour of the god Zeus, the earliest recorded Olympic Games featured a single event: a footrace.'},
+    {date:'1789', title:'The French Revolution begins', body:'Storming the Bastille prison, French citizens rose against monarchy and inequality under the cry of "Liberty, Equality, Fraternity", reshaping ideas of government worldwide.'},
+    {date:'1914–1918', title:'World War I', body:'A war among global empires, fought largely in trenches across Europe, ended with the collapse of empires and redrew the map of the world.'},
+    {date:'1939–1945', title:'World War II', body:'The deadliest conflict in human history ended with the defeat of Axis powers and the founding of the United Nations to preserve peace.'}
+  ]
+};
+
+const GK_DATA = [
+  {cat:'India', q:'Which is the longest river in India?', a:'The Ganga, flowing about 2,525 km from the Himalayas to the Bay of Bengal.'},
+  {cat:'India', q:'Who wrote India\'s national anthem?', a:'Rabindranath Tagore wrote "Jana Gana Mana".'},
+  {cat:'India', q:'How many states and union territories does India have?', a:'India has 28 states and 8 union territories.'},
+  {cat:'India', q:'Which is the highest civilian award in India?', a:'The Bharat Ratna.'},
+  {cat:'World', q:'Which is the smallest country in the world?', a:'Vatican City, with an area of about 0.44 sq. km.'},
+  {cat:'World', q:'Which river is the longest in the world?', a:'The Nile, at roughly 6,650 km (closely followed by the Amazon).'},
+  {cat:'World', q:'How many continents are there?', a:'Seven: Asia, Africa, North America, South America, Antarctica, Europe, Australia.'},
+  {cat:'Science', q:'What is the powerhouse of the cell?', a:'The mitochondria, which produces energy for the cell.'},
+  {cat:'Science', q:'What is the chemical formula of water?', a:'H₂O — two hydrogen atoms bonded to one oxygen atom.'},
+  {cat:'Science', q:'What planet is known as the Red Planet?', a:'Mars, coloured red by iron oxide (rust) on its surface.'},
+  {cat:'Science', q:'What is the speed of light?', a:'About 3 × 10⁸ metres per second (nearly 300,000 km/s) in a vacuum.'},
+  {cat:'Sports', q:'How many players are on a cricket team?', a:'11 players per side.'},
+  {cat:'Sports', q:'Where were the first modern Olympics held?', a:'Athens, Greece, in 1896.'},
+  {cat:'Sports', q:'How often is the FIFA World Cup held?', a:'Every 4 years.'},
+  {cat:'Sports', q:'Which country has won the most cricket World Cups?', a:'Australia, with 6 titles as of the most recent tournaments.'},
+  {cat:'India', q:'Which is the largest state in India by area?', a:'Rajasthan.'}
+];
+
+const MATH_TOPICS = {
+  'Primary (1–5)': ['Addition & Subtraction', 'Multiplication Tables', 'Shapes & Patterns', 'Basic Fractions', 'Time & Money'],
+  'Middle (6–8)': ['Integers', 'Fractions & Decimals', 'Simple Equations', 'Ratio & Proportion', 'Perimeter & Area'],
+  'Secondary (9–10)': ['Polynomials', 'Linear Equations in Two Variables', 'Quadratic Equations', 'Trigonometry Basics', 'Circles & Mensuration'],
+  'Sr. Secondary (11–12)': ['Sets & Functions', 'Limits & Derivatives', 'Integrals', 'Probability', 'Vectors & 3D Geometry']
+};
+
+const PRACTICE_PROBLEMS = [
+  { q:'Solve for x: 2x + 5 = 17', steps:['Subtract 5 from both sides: 2x = 17 − 5 = 12', 'Divide both sides by 2: x = 12 ÷ 2', 'x = 6'] },
+  { q:'Find the area of a rectangle with length 8 cm and breadth 5 cm.', steps:['Area of a rectangle = length × breadth', 'Area = 8 × 5', 'Area = 40 cm²'] },
+  { q:'Simplify: 3/4 + 1/2', steps:['Find a common denominator for 4 and 2, which is 4', 'Convert 1/2 to 2/4', 'Add: 3/4 + 2/4 = 5/4, which is 1 1/4'] },
+  { q:'Factorise: x² − 9', steps:['Recognise this as a difference of squares: a² − b²', 'Here a = x and b = 3, since 3² = 9', 'Apply a² − b² = (a+b)(a−b): (x+3)(x−3)'] }
+];
+
+/* =========================================================
+   API helper
+   ========================================================= */
+async function callClaude(messages, opts={}){
+  const body = { model: 'claude-sonnet-4-6', max_tokens: 1000, messages };
+  if(opts.system) body.system = opts.system;
+  if(opts.tools) body.tools = opts.tools;
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  if(!res.ok) throw new Error('Tutor engine did not respond (status ' + res.status + ')');
+  const data = await res.json();
+  return (data.content || []).map(b => b.type === 'text' ? b.text : '').join('\n').trim();
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result.split(',')[1]);
+    r.onerror = () => reject(new Error('Could not read the image'));
+    r.readAsDataURL(file);
+  });
+}
+
+/* =========================================================
+   Render root
+   ========================================================= */
+function render(){
+  document.getElementById('splash').style.display = state.screen === 'splash' ? 'flex' : 'none';
+  document.getElementById('splashLogo').innerHTML = LOGO_SVG(72);
+
+  const header = document.getElementById('appHeader');
+  const nav = document.getElementById('bottomNav');
+  const banner = document.getElementById('offlineBanner');
+  const screenArea = document.getElementById('screenArea');
+
+  if(state.screen === 'app'){
+    header.style.display = 'flex';
+    nav.style.display = 'flex';
+    header.innerHTML = renderHeader();
+    nav.innerHTML = renderNav();
+    banner.innerHTML = state.offline ? `<div class="offline-banner"><span class="offline-dot"></span>You're studying offline — live tutor, solver and GK refresh need internet.</div>` : '';
+    screenArea.innerHTML = renderTab();
+  } else {
+    header.style.display = 'none';
+    nav.style.display = 'none';
+    banner.innerHTML = '';
+    screenArea.innerHTML = state.screen === 'auth' ? renderAuth() : '';
+  }
+  bindEvents();
+}
+
+function renderHeader(){
+  return `
+  <div style="display:flex; align-items:center; gap:9px;">
+    ${LOGO_SVG(30)}
+    <div class="wordmark" style="font-size:16px; color:#fff;"><span style="color:#fff;">Suman</span> <span style="color:#F4A93C;">Gyan</span></div>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span class="grade-pill">${GRADE_LABELS[state.user.grade] || 'Class ' + state.user.grade}</span>
+    <button id="settingsBtn" aria-label="Settings, privacy and support" title="Settings" style="background:none;border:none;color:#F3E7CB;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+    <button id="logoutBtn" title="Log out" style="background:none;border:none;color:#F3E7CB;font-size:11px;font-weight:700;">Log out</button>
+  </div>`;
+}
+
+function renderNav(){
+  const items = [
+    {id:'home', label:'Home', icon:'M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z'},
+    {id:'geography', label:'Geo', icon:'M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm0 2c1.5 1.8 2.4 4 2.6 6H9.4c.2-2 1.1-4.2 2.6-6zM4.3 10a7.9 7.9 0 0 1 3-4.5A13.6 13.6 0 0 0 5.9 10zm0 4h1.6a13.6 13.6 0 0 0 1.4 4.5A7.9 7.9 0 0 1 4.3 14zM12 20c-1.5-1.8-2.4-4-2.6-6h5.2c-.2 2-1.1 4.2-2.6 6zm2.7-.5a13.6 13.6 0 0 0 1.4-4.5h1.6a7.9 7.9 0 0 1-3 4.5zM16.4 10a13.6 13.6 0 0 0-1.4-4.5 7.9 7.9 0 0 1 3 4.5z'},
+    {id:'history', label:'History', icon:'M12 2v2a8 8 0 1 1-6.3 3.1L4 5.5 2.7 8 7 9l1-4.3-1.7 1.6A10 10 0 1 0 12 2z'},
+    {id:'mathematics', label:'Maths', icon:'M4 4h16v3H4zM4 10h4v10H4zM10 10h4v4h-4zM16 10h4v10h-4zM10 16h4v4h-4z'},
+    {id:'gk', label:'GK', icon:'M12 2l2.4 6.6L21 9l-5 4.4L17.4 21 12 17.3 6.6 21 8 13.4 3 9l6.6-.4z'},
+    {id:'solver', label:'Solve', icon:'M4 5h16v12H4zM8 20h8M12 17v3'},
+    {id:'tutor', label:'Tutor', icon:'M12 2a5 5 0 0 1 5 5v2a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5zM4 20a8 8 0 0 1 16 0z'},
+  ];
+  return items.map(it => `
+    <button class="nav-btn ${state.activeTab===it.id?'active':''}" data-tab="${it.id}" aria-current="${state.activeTab===it.id?'page':'false'}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${it.icon}"/></svg>
+      ${it.label}
+    </button>`).join('');
+}
+
+function renderTab(){
+  switch(state.activeTab){
+    case 'home': return renderHome();
+    case 'geography': return renderGeography();
+    case 'history': return renderHistory();
+    case 'mathematics': return renderMath();
+    case 'gk': return renderGK();
+    case 'solver': return renderSolver();
+    case 'tutor': return renderTutor();
+    case 'settings': return renderSettings();
+    default: return '';
+  }
+}
+
+/* ---------- Settings / Privacy / Support (store-compliance screen) ---------- */
+function renderSettings(){
+  return `
+  <div class="page">
+    <h2 class="section-title">Settings & Privacy</h2>
+    <p class="section-sub">Everything the app stores require you to be able to find, in one place.</p>
+
+    <div class="card">
+      <h3 style="font-size:15px;">Account</h3>
+      <p class="hint mt8">Signed in as <strong>${state.user.name}</strong> (${state.user.email})</p>
+      <button class="btn btn-outline btn-sm mt12" id="deleteAccountBtn">Delete my account & data</button>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:15px;">Legal</h3>
+      <button class="link-btn mt8" data-legal="privacy" style="display:block;">Privacy Policy</button>
+      <button class="link-btn mt12" data-legal="terms" style="display:block;">Terms of Service</button>
+      <button class="link-btn mt12" data-legal="data" style="display:block;">What data we collect (Data Safety)</button>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:15px;">Safety for young learners</h3>
+      <p class="hint mt8" style="line-height:1.5;">Suman Gyan's AI Tutor and Visual Solver generate answers automatically. They can make mistakes. A teacher or parent should review important answers. No behavioural advertising or ad tracking is used anywhere in this app.</p>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:15px;">Support</h3>
+      <p class="hint mt8">Questions, problems, or something to report?</p>
+      <a class="btn btn-peacock btn-sm mt12 btn-block" href="mailto:support@sumangyan.app?subject=Suman%20Gyan%20Support" style="text-decoration:none; display:block; text-align:center;">Email support@sumangyan.app</a>
+    </div>
+
+    <p class="hint" style="text-align:center;">Suman Gyan · Version 1.0.0</p>
+
+    <div id="legalModal" style="display:none; position:fixed; inset:0; background:rgba(27,42,74,0.55); z-index:100; align-items:flex-end; justify-content:center;">
+      <div style="background:var(--white); border-radius:20px 20px 0 0; max-height:80%; overflow-y:auto; width:100%; max-width:430px; padding:22px;">
+        <div id="legalModalBody"></div>
+        <button class="btn btn-outline btn-block mt16" id="legalCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+const LEGAL_TEXT = {
+  privacy: {
+    title: 'Privacy Policy (draft — have a lawyer review before publishing)',
+    body: `We collect: your name, email address, and class/grade when you create an account, so we can personalise lessons.
+If you use the Visual Question Solver, the photo you upload is sent to our tutoring AI provider to generate an explanation, and is not stored longer than needed to answer your question.
+If you use Ask a Tutor, your questions are sent to our AI provider to generate a reply.
+We do not sell personal data, and we do not show behavioural or targeted advertising to any user.
+Children's privacy: this app is used by students as young as Class 1. Where a user identifies as under the applicable age of consent, we require a parent or guardian's email before an account is created, and parents may request deletion of their child's data at any time via Settings or by emailing support.
+You can request that we delete your account and all associated data at any time from Settings → "Delete my account & data" or by emailing support@sumangyan.app.`
+  },
+  terms: {
+    title: 'Terms of Service (draft — have a lawyer review before publishing)',
+    body: `Suman Gyan is an educational study aid. Explanations produced by the AI Tutor, Visual Solver, and the step-by-step calculator are generated automatically and may occasionally be incomplete or incorrect — always check important answers with a teacher or textbook.
+Be respectful when using Ask a Tutor. Do not submit content that is unsafe, harassing, or unrelated to schoolwork; we may suspend accounts that misuse the tutor chat.
+The service is provided "as is" without warranty. Continued use of the app means you accept these terms and our Privacy Policy.`
+  },
+  data: {
+    title: 'Data we collect and why',
+    body: `Account data: name, email, class/grade — used to sign you in and personalise content.
+Photos (Visual Solver only): sent to our AI provider at the moment you tap "Solve", used only to generate your explanation.
+Chat messages (Ask a Tutor): sent to our AI provider to generate replies; kept only for your current session.
+We do not collect location, contacts, or device identifiers, and we do not use third-party advertising or analytics SDKs that track you across other apps.`
+  }
+};
+
+/* ---------- Auth ---------- */
+const CHILD_GRADES = ['1','2','3','4','5','6','7','8']; // under-13 in most systems: gate primary + middle school
+
+function renderAuth(){
+  const isLogin = state.authMode === 'login';
+  const grade = state.suGradeDraft || '6';
+  const isChild = CHILD_GRADES.includes(grade);
+  return `
+  <div id="authScreen">
+    <div class="logo-badge">${LOGO_SVG(52)}</div>
+    <h2 style="margin-top:14px; font-size:24px;">Welcome to Suman Gyan</h2>
+    <p class="section-sub">A patient tutor for every subject, every class.</p>
+    <div class="auth-toggle" role="tablist">
+      <button data-auth="login" role="tab" aria-selected="${isLogin}" class="${isLogin?'active':''}">Log in</button>
+      <button data-auth="signup" role="tab" aria-selected="${!isLogin}" class="${!isLogin?'active':''}">Sign up</button>
+    </div>
+    ${isLogin ? `
+      <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com"></div>
+      <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password"></div>
+      <button class="btn btn-primary btn-block" id="loginBtn">Log in</button>
+      <button class="link-btn mt12" id="demoFillBtn" type="button">Use demo account instead</button>
+    ` : `
+      <div class="field"><label for="suName">Full name</label><input id="suName" type="text" autocomplete="name" placeholder="Your name"></div>
+      <div class="field"><label for="suEmail">Email</label><input id="suEmail" type="email" autocomplete="email" placeholder="you@example.com"></div>
+      <div class="field"><label for="suGrade">Class</label>
+        <select id="suGrade">${Object.keys(GRADE_LABELS).map(g=>`<option value="${g}" ${g===grade?'selected':''}>${GRADE_LABELS[g]}</option>`).join('')}</select>
+      </div>
+      ${isChild ? `
+      <div class="banner-info">Students in Class 1–8 need a parent or guardian's email to create an account, in line with children's-privacy rules (COPPA / Google Play Families / Apple Kids guidelines).</div>
+      <div class="field"><label for="suGuardianEmail">Parent / guardian email</label><input id="suGuardianEmail" type="email" autocomplete="email" placeholder="parent@example.com"></div>
+      ` : ''}
+      <div class="field"><label for="suPassword">Password</label><input id="suPassword" type="password" autocomplete="new-password" placeholder="At least 6 characters"></div>
+      <div class="field"><label for="suConfirm">Confirm password</label><input id="suConfirm" type="password" autocomplete="new-password" placeholder="Re-enter password"></div>
+      <div class="field" style="display:flex; align-items:flex-start; gap:8px;">
+        <input type="checkbox" id="suConsent" style="width:auto; margin-top:3px;">
+        <label for="suConsent" style="font-size:12.5px; font-weight:500; color:var(--text-soft);">${isChild ? 'I am a parent or guardian, or this account is being created with a parent or guardian\'s permission, and I' : 'I'} agree to the <button type="button" class="link-btn" data-legal-inline="terms" style="font-size:12.5px;">Terms of Service</button> and <button type="button" class="link-btn" data-legal-inline="privacy" style="font-size:12.5px;">Privacy Policy</button>.</label>
+      </div>
+      <button class="btn btn-primary btn-block" id="signupBtn">Create account</button>
+    `}
+    ${state.authError ? `<p class="error-msg" role="alert">${state.authError}</p>` : ''}
+    <button class="link-btn mt16" id="guestBtn">Continue as guest instead</button>
+    <p class="hint mt16" style="text-align:center;">
+      <button type="button" class="link-btn" data-legal-inline="privacy">Privacy Policy</button> · <button type="button" class="link-btn" data-legal-inline="terms">Terms</button>
+    </p>
+    <div id="legalModal" style="display:none; position:fixed; inset:0; background:rgba(27,42,74,0.55); z-index:100; align-items:flex-end; justify-content:center;">
+      <div style="background:var(--white); border-radius:20px 20px 0 0; max-height:80%; overflow-y:auto; width:100%; max-width:430px; padding:22px;">
+        <div id="legalModalBody"></div>
+        <button class="btn btn-outline btn-block mt16" id="legalCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Home ---------- */
+function renderHome(){
+  const subjects = [
+    {id:'geography', name:'Geography', color:'linear-gradient(135deg,#123A5C,#0E6E5A)', icon:'M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2z'},
+    {id:'history', name:'History', color:'linear-gradient(135deg,#712330,#8C2F39)', icon:'M12 2v9l6 3'},
+    {id:'mathematics', name:'Mathematics', color:'linear-gradient(135deg,#1B2A4A,#324066)', icon:'M4 4h16v16H4z'},
+    {id:'gk', name:'General Knowledge', color:'linear-gradient(135deg,#E08A1B,#F4A93C)', icon:'M12 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z'},
+    {id:'solver', name:'Visual Solver', color:'linear-gradient(135deg,#0A5346,#0E6E5A)', icon:'M4 5h16v12H4z'},
+    {id:'tutor', name:'Ask a Tutor', color:'linear-gradient(135deg,#8C2F39,#E08A1B)', icon:'M12 2a5 5 0 0 1 5 5v2a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z'},
+  ];
+  return `
+  <div class="page">
+    <h2 class="section-title">Namaste, ${state.user.name.split(' ')[0]} 👋</h2>
+    <p class="section-sub">${GRADE_LABELS[state.user.grade]} · Ready to learn something today?</p>
+
+    <div class="card">
+      <div class="row"><strong style="font-family:'Fraunces',serif;">Offline mode</strong>
+        <label style="position:relative; display:inline-block; width:42px; height:24px;">
+          <input type="checkbox" id="offlineToggle" ${state.offline?'checked':''} style="opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer;z-index:2;">
+          <span style="position:absolute;inset:0;background:${state.offline?'var(--peacock)':'var(--paper-deep)'};border-radius:20px;transition:.2s;"></span>
+          <span style="position:absolute;top:3px;left:${state.offline?'21px':'3px'};width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></span>
+        </label>
+      </div>
+      <p class="hint mt8">${state.offline ? 'Cached lessons only — tutor, solver and live GK are paused.' : 'All features are live and connected.'}</p>
+    </div>
+
+    <h3 style="font-size:15px; margin-bottom:10px;">Your subjects</h3>
+    <div class="subject-grid">
+      ${subjects.map(s=>`
+        <button class="subject-card" data-tab="${s.id}" style="background:${s.color};">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="${s.icon}"/></svg>
+          <div>
+            <div class="name">${s.name}</div>
+            ${state.progress[s.id]!==undefined ? `<div class="progress-track"><div class="progress-fill" style="width:${state.progress[s.id]}%;"></div></div>` : ''}
+          </div>
+        </button>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ---------- Geography ---------- */
+function renderGeography(){
+  const tab = state.geoTab || 'world';
+  const dataMap = { world: WORLD_FACTS, india: INDIA_FACTS, physical: PHYSICAL_FACTS };
+  const facts = dataMap[tab];
+  const sel = state.mapSelection.geo;
+
+  const worldSvg = `
+  <svg viewBox="0 0 300 170">
+    <g class="map-region ${sel==='North America'?'selected':''}" data-region="North America"><path d="M25 30 L70 20 L85 45 L70 70 L40 75 L20 55 Z" fill="#3C7A46"/></g>
+    <g class="map-region ${sel==='South America'?'selected':''}" data-region="South America"><path d="M60 85 L85 80 L95 120 L75 150 L60 130 Z" fill="#4C9155"/></g>
+    <g class="map-region ${sel==='Europe'?'selected':''}" data-region="Europe"><path d="M135 25 L165 18 L172 38 L150 48 L132 42 Z" fill="#C9782E"/></g>
+    <g class="map-region ${sel==='Africa'?'selected':''}" data-region="Africa"><path d="M132 48 L168 45 L178 90 L155 135 L128 100 Z" fill="#D6A23C"/></g>
+    <g class="map-region ${sel==='Asia'?'selected':''}" data-region="Asia"><path d="M175 15 L260 20 L270 60 L230 90 L195 75 L172 40 Z" fill="#B94A48"/></g>
+    <g class="map-region ${sel==='Australia'?'selected':''}" data-region="Australia"><path d="M225 110 L262 108 L268 130 L235 138 Z" fill="#4B7FA6"/></g>
+    <g class="map-region ${sel==='Antarctica'?'selected':''}" data-region="Antarctica"><path d="M90 158 L230 158 L215 170 L110 170 Z" fill="#CFE3E8"/></g>
+    <text x="45" y="52" class="map-label">N. AMERICA</text>
+    <text x="65" y="118" class="map-label">S. AMERICA</text>
+    <text x="140" y="34" class="map-label">EUROPE</text>
+    <text x="140" y="92" class="map-label">AFRICA</text>
+    <text x="205" y="52" class="map-label">ASIA</text>
+    <text x="228" y="122" class="map-label">AUSTRALIA</text>
+    <text x="140" y="167" class="map-label">ANTARCTICA</text>
+  </svg>`;
+
+  const indiaSvg = `
+  <svg viewBox="0 0 220 240">
+    <g class="map-region" data-region="__india_outline"><path d="M95 10 L130 15 L140 40 L165 55 L175 85 L160 110 L170 135 L150 165 L140 210 L120 225 L110 190 L95 170 L70 150 L60 120 L75 90 L65 60 L80 35 Z" fill="#0E6E5A" opacity="0.55" stroke="#F3E7CB" stroke-width="1.5"/></g>
+    ${[
+      {n:'Delhi', x:95, y:55},
+      {n:'Jaipur', x:78, y:78},
+      {n:'Mumbai', x:70, y:140},
+      {n:'Bhopal', x:100, y:120},
+      {n:'Kolkata', x:150, y:110},
+      {n:'Chennai', x:115, y:195},
+      {n:'Bengaluru', x:100, y:180},
+      {n:'Guwahati', x:172, y:88},
+    ].map(c=>`
+      <g class="map-region ${sel===c.n?'selected':''}" data-region="${c.n}">
+        <circle cx="${c.x}" cy="${c.y}" r="6" fill="#F4A93C"/>
+        <text x="${c.x+9}" y="${c.y+3}" class="map-label">${c.n}</text>
+      </g>`).join('')}
+  </svg>`;
+
+  const physicalSvg = `
+  <svg viewBox="0 0 220 240">
+    <path d="M95 10 L130 15 L140 40 L165 55 L175 85 L160 110 L170 135 L150 165 L140 210 L120 225 L110 190 L95 170 L70 150 L60 120 L75 90 L65 60 L80 35 Z" fill="#123A5C" opacity="0.4" stroke="#F3E7CB" stroke-width="1.5"/>
+    <g class="map-region ${sel==='Himalayas'?'selected':''}" data-region="Himalayas"><path d="M70 20 L150 18 L145 32 L75 34 Z" fill="#EAF3F5"/><text x="72" y="16" class="map-label">HIMALAYAS</text></g>
+    <g class="map-region ${sel==='Thar Desert'?'selected':''}" data-region="Thar Desert"><ellipse cx="75" cy="65" rx="16" ry="12" fill="#E3C77E"/><text x="55" y="60" class="map-label">THAR</text></g>
+    <g class="map-region ${sel==='Ganga Basin'?'selected':''}" data-region="Ganga Basin"><path d="M90 45 Q125 60 160 90" fill="none" stroke="#5AA9D6" stroke-width="4"/><text x="115" y="52" class="map-label">GANGA</text></g>
+    <g class="map-region ${sel==='Deccan Plateau'?'selected':''}" data-region="Deccan Plateau"><ellipse cx="105" cy="150" rx="28" ry="30" fill="#B77B4A"/><text x="82" y="150" class="map-label">DECCAN</text></g>
+    <g class="map-region ${sel==='Western Ghats'?'selected':''}" data-region="Western Ghats"><path d="M75 120 L65 200" fill="none" stroke="#3C7A46" stroke-width="5"/><text x="35" y="165" class="map-label">W.GHATS</text></g>
+  </svg>`;
+
+  const svg = tab==='world' ? worldSvg : tab==='india' ? indiaSvg : physicalSvg;
+
+  return `
+  <div class="page">
+    <h2 class="section-title">Geography</h2>
+    <p class="section-sub">Tap a region on the map to reveal a fact.</p>
+    <div>
+      <button class="chip geo-tab ${tab==='world'?'active':''}" data-geo="world">World</button>
+      <button class="chip geo-tab ${tab==='india'?'active':''}" data-geo="india">India</button>
+      <button class="chip geo-tab ${tab==='physical'?'active':''}" data-geo="physical">Physical Features</button>
+    </div>
+    <div class="map-wrap mt12">${svg}</div>
+    <p class="hint mt8">Maps are simplified for study and not to exact scale.</p>
+    <div class="fact-pop ${sel && facts[sel] ? 'show':''}" id="geoFact">
+      ${sel && facts[sel] ? `<h4 style="font-size:15px;">${sel}</h4><p class="hint mt8" style="font-size:13.5px; color:var(--text);">${facts[sel]}</p>` : ''}
+    </div>
+  </div>`;
+}
+
+/* ---------- History ---------- */
+function renderHistory(){
+  const era = state.historyEra || 'Ancient India';
+  const items = HISTORY_ERAS[era];
+  const openSet = state.historyOpen || {};
+  return `
+  <div class="page">
+    <h2 class="section-title">History</h2>
+    <p class="section-sub">Specific dates, short stories — pick an era below.</p>
+    <div>${Object.keys(HISTORY_ERAS).map(e=>`<button class="chip era-tab ${era===e?'active':''}" data-era="${e}">${e}</button>`).join('')}</div>
+    <div class="timeline mt16">
+      ${items.map((it,i)=>{
+        const key = era+i;
+        const open = openSet[key];
+        return `
+        <div class="tl-item ${open?'open':''}">
+          <div class="tl-date">${it.date}</div>
+          <div class="tl-title">${it.title}</div>
+          <button class="tl-toggle" data-histkey="${key}">${open?'Hide story':'Read the story'}</button>
+          <div class="tl-body">${it.body}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+/* ---------- Mathematics ---------- */
+function renderMath(){
+  const band = state.mathBand || 'Secondary (9–10)';
+  const pIndex = state.practiceOpen || {};
+  return `
+  <div class="page">
+    <h2 class="section-title">Mathematics</h2>
+    <p class="section-sub">Pick a topic, or try the step-by-step calculator.</p>
+
+    <div class="card">
+      <h3 style="font-size:15.5px; margin-bottom:10px;">Advanced calculator</h3>
+      <input id="calcInput" type="text" placeholder="e.g. 2x + 5 = 17, or 3/4 + 1/2" value="${state.calcExpr}" style="width:100%; padding:12px 14px; border-radius:11px; border:1.5px solid var(--line); font-size:14.5px; margin-bottom:10px;">
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline btn-sm" id="calcQuick">Quick answer</button>
+        <button class="btn btn-primary btn-sm" id="calcSteps" ${state.offline?'disabled':''}>Show steps ${state.offline?'(needs internet)':''}</button>
+      </div>
+      ${state.calcResult!==null ? `<div class="calc-display mt12">${state.calcResult}</div>` : ''}
+      ${state.calcLoading ? `<div class="typing mt12"><span></span><span></span><span></span></div>` : ''}
+      ${state.calcError ? `<p class="error-msg">${state.calcError}</p>` : ''}
+      ${state.calcSteps ? `<ol class="steps-list mt12">${state.calcSteps.map(s=>`<li>${s}</li>`).join('')}</ol>` : ''}
+    </div>
+
+    <h3 style="font-size:15px; margin:18px 0 10px;">Topics by class</h3>
+    <div>${Object.keys(MATH_TOPICS).map(b=>`<button class="chip band-tab ${band===b?'active':''}" data-band="${b}">${b}</button>`).join('')}</div>
+    <div class="card mt12">
+      ${MATH_TOPICS[band].map(t=>`<div style="padding:8px 0; border-bottom:1px dashed var(--line); font-size:14px;">${t}</div>`).join('')}
+    </div>
+
+    <h3 style="font-size:15px; margin:18px 0 10px;">Offline practice problems</h3>
+    ${PRACTICE_PROBLEMS.map((p,i)=>`
+      <div class="card">
+        <div class="row"><strong style="font-size:14px;">${p.q}</strong></div>
+        <button class="link-btn mt8" data-practice="${i}">${pIndex[i] ? 'Hide solution' : 'Show solution'}</button>
+        ${pIndex[i] ? `<ol class="steps-list mt12">${p.steps.map(s=>`<li>${s}</li>`).join('')}</ol>` : ''}
+      </div>`).join('')}
+  </div>`;
+}
+
+/* ---------- GK ---------- */
+function renderGK(){
+  const cat = state.gkCategory;
+  const list = cat==='All' ? GK_DATA : GK_DATA.filter(g=>g.cat===cat);
+  const cats = ['All','India','World','Science','Sports'];
+  return `
+  <div class="page">
+    <h2 class="section-title">General Knowledge</h2>
+    <p class="section-sub">Evergreen facts, plus a live refresh for what's current.</p>
+    <div>${cats.map(c=>`<button class="chip gk-cat ${cat===c?'active':''}" data-cat="${c}">${c}</button>`).join('')}</div>
+
+    ${state.offline ? `<div class="banner-warn mt12">Offline mode: showing saved facts only.</div>` :
+      `<button class="btn btn-peacock btn-block mt12" id="gkRefresh" ${state.gkLoading?'disabled':''}>${state.gkLoading?'Fetching latest facts…':'Get fresh current-affairs GK'}</button>`}
+    ${state.gkError ? `<p class="error-msg">${state.gkError}</p>` : ''}
+    ${state.gkExtra ? `<div class="card mt12"><h4 style="font-size:14.5px;">Fresh from today</h4><p class="hint mt8" style="color:var(--text); font-size:13.5px; white-space:pre-wrap;">${state.gkExtra}</p></div>` : ''}
+
+    <div class="mt16">
+      ${list.map(g=>`
+        <div class="card">
+          <span class="chip" style="margin-bottom:8px;">${g.cat}</span>
+          <div style="font-weight:700; font-size:14px; margin-bottom:6px;">${g.q}</div>
+          <div style="font-size:13.5px; color:var(--text-soft);">${g.a}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ---------- Visual Solver ---------- */
+function renderSolver(){
+  return `
+  <div class="page">
+    <h2 class="section-title">Visual Question Solver</h2>
+    <p class="section-sub">Snap or upload a question — get a step-by-step explanation.</p>
+    ${state.offline ? `<div class="banner-warn">This feature needs internet — switch off offline mode from Home.</div>` : `<div class="banner-info">Works for maths, science, geography or any school question in a photo. AI answers can be wrong sometimes — check important ones with a teacher.</div>`}
+
+    <div class="upload-box mt12">
+      <input type="file" id="solverFile" accept="image/*" style="display:none;">
+      <button class="btn btn-outline" id="solverPick">Choose an image</button>
+      ${state.solverImage ? `<img class="preview-img" src="${state.solverImage}">` : `<p class="hint mt8">PNG or JPG of a textbook question</p>`}
+    </div>
+    <div class="field mt12"><label>Anything to add? (optional)</label><input id="solverContext" type="text" placeholder="e.g. this is a Class 9 physics question" value="${state.solverContext}"></div>
+    <button class="btn btn-primary btn-block" id="solverSubmit" ${state.offline || !state.solverImage || state.solverLoading ? 'disabled':''}>${state.solverLoading?'Reading and solving…':'Solve this question'}</button>
+    ${state.solverError ? `<p class="error-msg">${state.solverError}</p>` : ''}
+    ${state.solverLoading ? `<div class="typing mt12"><span></span><span></span><span></span></div>` : ''}
+    ${state.solverAnswer ? `<div class="card mt16"><h4 style="font-size:15px;">Explanation</h4><p class="mt8" style="font-size:13.8px; line-height:1.55; white-space:pre-wrap;">${state.solverAnswer}</p></div>` : ''}
+  </div>`;
+}
+
+/* ---------- Tutor chat ---------- */
+function renderTutor(){
+  return `
+  <div class="page" style="display:flex; flex-direction:column; min-height:calc(100% - 22px);">
+    <h2 class="section-title">Ask a Tutor</h2>
+    <p class="section-sub">Explains any subject, simply — ${GRADE_LABELS[state.user.grade]} level.</p>
+    <p class="hint" style="margin-bottom:10px;">AI-generated answers can be wrong sometimes — check important ones with a teacher.</p>
+    ${state.offline ? `<div class="banner-warn">Offline mode is on — the live tutor needs internet.</div>` : ''}
+    <div class="chat-scroll" id="chatScroll" role="log" aria-live="polite">
+      ${state.tutorMessages.length===0 ? `<div class="empty-note">Ask anything — "Why is the sky blue?" or "Explain photosynthesis simply."</div>` : ''}
+      ${state.tutorMessages.map((m,i)=>`<div class="msg ${m.role==='user'?'user':'bot'}">${m.text}${m.role!=='user'?`<div><button class="link-btn" style="font-size:11px; margin-top:6px;" data-report-msg="${i}">Report this answer</button></div>`:''}</div>`).join('')}
+      ${state.tutorLoading ? `<div class="msg bot"><div class="typing"><span></span><span></span><span></span></div></div>` : ''}
+    </div>
+    <div class="chat-input-row">
+      <input id="tutorInput" type="text" placeholder="${state.offline?'Needs internet…':'Type your question…'}" ${state.offline?'disabled':''}>
+      <button class="btn btn-primary btn-sm" id="tutorSend" ${state.offline?'disabled':''}>Send</button>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   Event binding
+   ========================================================= */
+function bindEvents(){
+  document.querySelectorAll('[data-auth]').forEach(b=>b.onclick=()=>{ state.authMode=b.dataset.auth; state.authError=''; render(); });
+
+  const guestBtn = document.getElementById('guestBtn');
+  if(guestBtn) guestBtn.onclick = () => {
+    state.user = { name:'Guest Student', email:'guest@sumangyan.app', grade:'6' };
+    state.screen='app'; state.activeTab='home'; render();
+  };
+
+  const demoFillBtn = document.getElementById('demoFillBtn');
+  if(demoFillBtn) demoFillBtn.onclick = () => {
+    document.getElementById('loginEmail').value = 'demo@sumangyan.app';
+    document.getElementById('loginPassword').value = 'demo1234';
+  };
+
+  const loginBtn = document.getElementById('loginBtn');
+  if(loginBtn) loginBtn.onclick = () => {
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const pw = document.getElementById('loginPassword').value;
+    const u = state.users[email];
+    if(!u || u.password !== pw){ state.authError = 'Email or password is incorrect.'; render(); return; }
+    state.user = u; state.authError=''; state.screen='app'; state.activeTab='home'; render();
+  };
+
+  const suGradeSelect = document.getElementById('suGrade');
+  if(suGradeSelect) suGradeSelect.onchange = (e) => { state.suGradeDraft = e.target.value; render(); };
+
+  document.querySelectorAll('[data-legal-inline]').forEach(b=>b.onclick=()=>{
+    const item = LEGAL_TEXT[b.dataset.legalInline];
+    document.getElementById('legalModalBody').innerHTML = `<h3 style="font-size:16px; margin-bottom:12px;">${item.title}</h3><p style="font-size:13.2px; line-height:1.6; white-space:pre-line; color:var(--text-soft);">${item.body}</p>`;
+    document.getElementById('legalModal').style.display = 'flex';
+  });
+
+  const signupBtn = document.getElementById('signupBtn');
+  if(signupBtn) signupBtn.onclick = () => {
+    const name = document.getElementById('suName').value.trim();
+    const email = document.getElementById('suEmail').value.trim().toLowerCase();
+    const grade = document.getElementById('suGrade').value;
+    const pw = document.getElementById('suPassword').value;
+    const cpw = document.getElementById('suConfirm').value;
+    const consent = document.getElementById('suConsent').checked;
+    const isChild = CHILD_GRADES.includes(grade);
+    const guardianEmailEl = document.getElementById('suGuardianEmail');
+    const guardianEmail = guardianEmailEl ? guardianEmailEl.value.trim().toLowerCase() : '';
+    if(!name || !email){ state.authError='Please fill in your name and email.'; render(); return; }
+    if(!email.includes('@')){ state.authError='Enter a valid email address.'; render(); return; }
+    if(state.users[email]){ state.authError='An account with this email already exists.'; render(); return; }
+    if(isChild && !guardianEmail.includes('@')){ state.authError='A parent or guardian email is required for this class level.'; render(); return; }
+    if(pw.length < 6){ state.authError='Password must be at least 6 characters.'; render(); return; }
+    if(pw !== cpw){ state.authError='Passwords do not match.'; render(); return; }
+    if(!consent){ state.authError='Please accept the Terms of Service and Privacy Policy to continue.'; render(); return; }
+    const u = { name, email, password: pw, grade, guardianEmail: isChild ? guardianEmail : null };
+    state.users[email] = u; state.user = u; state.authError='';
+    state.screen='app'; state.activeTab='home'; render();
+  };
+
+  const settingsBtn = document.getElementById('settingsBtn');
+  if(settingsBtn) settingsBtn.onclick = () => { state.activeTab='settings'; render(); };
+
+  document.querySelectorAll('[data-legal]').forEach(b=>b.onclick=()=>{
+    const item = LEGAL_TEXT[b.dataset.legal];
+    document.getElementById('legalModalBody').innerHTML = `<h3 style="font-size:16px; margin-bottom:12px;">${item.title}</h3><p style="font-size:13.2px; line-height:1.6; white-space:pre-line; color:var(--text-soft);">${item.body}</p>`;
+    document.getElementById('legalModal').style.display = 'flex';
+  });
+  const legalCloseBtn = document.getElementById('legalCloseBtn');
+  if(legalCloseBtn) legalCloseBtn.onclick = () => { document.getElementById('legalModal').style.display='none'; };
+
+  const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+  if(deleteAccountBtn) deleteAccountBtn.onclick = () => {
+    if(!confirm('This will permanently delete your account and progress. Continue?')) return;
+    delete state.users[state.user.email];
+    state.user = null; state.tutorMessages=[]; state.screen='auth'; state.authMode='login'; render();
+  };
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  if(logoutBtn) logoutBtn.onclick = () => { state.user=null; state.screen='auth'; state.authMode='login'; render(); };
+
+  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ state.activeTab=b.dataset.tab; render(); });
+
+  const offlineToggle = document.getElementById('offlineToggle');
+  if(offlineToggle) offlineToggle.onchange = (e) => { state.offline = e.target.checked; render(); };
+
+  document.querySelectorAll('.geo-tab').forEach(b=>b.onclick=()=>{ state.geoTab=b.dataset.geo; state.mapSelection.geo=null; render(); });
+  document.querySelectorAll('.map-region').forEach(el=>el.onclick=()=>{
+    const r = el.dataset.region;
+    if(r === '__india_outline') return;
+    state.mapSelection.geo = state.mapSelection.geo === r ? null : r;
+    render();
+  });
+
+  document.querySelectorAll('.era-tab').forEach(b=>b.onclick=()=>{ state.historyEra=b.dataset.era; render(); });
+  document.querySelectorAll('[data-histkey]').forEach(b=>b.onclick=()=>{
+    state.historyOpen = state.historyOpen || {};
+    const k = b.dataset.histkey;
+    state.historyOpen[k] = !state.historyOpen[k];
+    render();
+  });
+
+  document.querySelectorAll('.band-tab').forEach(b=>b.onclick=()=>{ state.mathBand=b.dataset.band; render(); });
+  document.querySelectorAll('[data-practice]').forEach(b=>b.onclick=()=>{
+    state.practiceOpen = state.practiceOpen || {};
+    const i = b.dataset.practice;
+    state.practiceOpen[i] = !state.practiceOpen[i];
+    render();
+  });
+
+  const calcInput = document.getElementById('calcInput');
+  if(calcInput) calcInput.oninput = (e)=>{ state.calcExpr = e.target.value; };
+
+  const calcQuick = document.getElementById('calcQuick');
+  if(calcQuick) calcQuick.onclick = () => {
+    state.calcError=''; state.calcSteps=null;
+    try{
+      const expr = state.calcExpr.replace(/x/g,'').trim();
+      if(!expr){ state.calcResult = null; render(); return; }
+      state.calcResult = math.evaluate(expr).toString();
+    }catch(err){ state.calcError = 'Could not evaluate that as a plain expression — try "Show steps" for equations with x.'; state.calcResult=null; }
+    render();
+  };
+
+  const calcStepsBtn = document.getElementById('calcSteps');
+  if(calcStepsBtn) calcStepsBtn.onclick = async () => {
+    if(!state.calcExpr.trim()) return;
+    state.calcLoading = true; state.calcError=''; state.calcSteps=null; render();
+    try{
+      const text = await callClaude(
+        [{ role:'user', content: `Solve this step by step for a school student (${GRADE_LABELS[state.user.grade]}): ${state.calcExpr}\n\nReturn ONLY a numbered list of short steps, one per line, no preamble, no markdown symbols.` }],
+        { system: 'You are a patient maths tutor for Indian school students. Be concise, correct, and use simple language.' }
+      );
+      const steps = text.split('\n').map(l=>l.replace(/^\s*\d+[\.\)]\s*/, '').trim()).filter(Boolean);
+      state.calcSteps = steps.length ? steps : [text];
+    }catch(err){ state.calcError = 'Could not reach the tutor engine. Please check your connection and try again.'; }
+    state.calcLoading = false; render();
+  };
+
+  const gkRefresh = document.getElementById('gkRefresh');
+  if(gkRefresh) gkRefresh.onclick = async () => {
+    state.gkLoading = true; state.gkError=''; render();
+    try{
+      const text = await callClaude(
+        [{ role:'user', content: 'Give 5 recent, verified, evergreen-safe general knowledge / current affairs facts suitable for Indian school students. Keep each to one short sentence, numbered 1-5, no preamble.' }],
+        { system: 'You are a GK editor for a school app. Be accurate and concise. If you are not fully certain of a very recent fact, prefer a slightly older but verified one.', tools: [{ type:'web_search_20250305', name:'web_search' }] }
+      );
+      state.gkExtra = text || 'No fresh facts returned — please try again.';
+    }catch(err){ state.gkError = 'Could not fetch live facts. Please check your connection.'; }
+    state.gkLoading = false; render();
+  };
+  document.querySelectorAll('.gk-cat').forEach(b=>b.onclick=()=>{ state.gkCategory=b.dataset.cat; render(); });
+
+  const solverPick = document.getElementById('solverPick');
+  const solverFile = document.getElementById('solverFile');
+  if(solverPick) solverPick.onclick = () => solverFile.click();
+  if(solverFile) solverFile.onchange = (e) => {
+    const f = e.target.files[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = () => { state.solverImage = reader.result; state.solverAnswer=null; state.solverError=''; render(); };
+    reader.readAsDataURL(f);
+  };
+  const solverContext = document.getElementById('solverContext');
+  if(solverContext) solverContext.oninput = (e)=>{ state.solverContext = e.target.value; };
+  const solverSubmit = document.getElementById('solverSubmit');
+  if(solverSubmit) solverSubmit.onclick = async () => {
+    if(!state.solverImage) return;
+    state.solverLoading = true; state.solverError=''; state.solverAnswer=null; render();
+    try{
+      const mediaType = state.solverImage.substring(5, state.solverImage.indexOf(';'));
+      const base64 = state.solverImage.split(',')[1];
+      const text = await callClaude([{
+        role:'user',
+        content:[
+          { type:'image', source:{ type:'base64', media_type: mediaType, data: base64 } },
+          { type:'text', text: `Solve or explain this school question step by step in simple language for a ${GRADE_LABELS[state.user.grade]} student. ${state.solverContext ? 'Context: ' + state.solverContext : ''}` }
+        ]
+      }], { system: 'You are a kind, patient personal tutor for Indian school students across all subjects. Explain clearly with short steps.' });
+      state.solverAnswer = text || 'Could not read an answer from the image — try a clearer photo.';
+    }catch(err){ state.solverError = 'Could not reach the tutor engine. Please check your connection and try again.'; }
+    state.solverLoading = false; render();
+  };
+
+  const tutorSend = document.getElementById('tutorSend');
+  const tutorInput = document.getElementById('tutorInput');
+  async function sendTutorMsg(){
+    const val = tutorInput.value.trim();
+    if(!val || state.tutorLoading) return;
+    state.tutorMessages.push({ role:'user', text: val });
+    tutorInput.value=''; state.tutorLoading = true; render();
+    try{
+      const history = state.tutorMessages.map(m=>({ role: m.role==='user'?'user':'assistant', content: m.text }));
+      const text = await callClaude(history, { system: `You are a warm, patient personal tutor for a ${GRADE_LABELS[state.user.grade]} Indian student, able to explain any subject simply, with short paragraphs and everyday examples.` });
+      state.tutorMessages.push({ role:'assistant', text: text || "I couldn't quite work that out — try rephrasing?" });
+    }catch(err){ state.tutorMessages.push({ role:'assistant', text: 'I could not reach the tutor engine. Please check your connection and try again.' }); }
+    state.tutorLoading = false; render();
+    const scroll = document.getElementById('chatScroll');
+    if(scroll) scroll.scrollTop = scroll.scrollHeight;
+  }
+  if(tutorSend) tutorSend.onclick = sendTutorMsg;
+  if(tutorInput) tutorInput.onkeydown = (e) => { if(e.key==='Enter') sendTutorMsg(); };
+
+  document.querySelectorAll('[data-report-msg]').forEach(b=>b.onclick=()=>{
+    const i = b.dataset.reportMsg;
+    const msg = state.tutorMessages[i];
+    window.location.href = `mailto:support@sumangyan.app?subject=Reported%20tutor%20answer&body=${encodeURIComponent('I want to report this AI answer:\n\n' + (msg ? msg.text : ''))}`;
+  });
+}
+
+/* =========================================================
+   Real connectivity + offline app-shell (service worker)
+   ========================================================= */
+// Reflect actual device connectivity, in addition to the manual "study offline" switch.
+window.addEventListener('offline', () => { state.offline = true; render(); });
+window.addEventListener('online', () => { /* leave manual toggle as-is; user can flip it back on */ });
+if(!navigator.onLine) state.offline = true;
+
+// Registering this makes the app-shell installable and load offline once visited once —
+// required groundwork for Android TWA / PWA packaging. See service-worker.js in the store-ready package.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{ /* not fatal inside a sandboxed preview */ });
+  });
+}
+
+/* =========================================================
+   Boot
+   ========================================================= */
+render();
+setTimeout(() => { state.screen = 'auth'; render(); }, 1600);
+</script>
+</body>
+</html>

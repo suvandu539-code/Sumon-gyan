@@ -1,0 +1,22 @@
+{
+  "name": "Suman Gyan — Your Personal Tutor",
+  "short_name": "Suman Gyan",
+  "description": "A personal tutor app for Indian students from Class 1 to 12 — Geography, History, Mathematics, General Knowledge, a visual question solver, and an AI tutor.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF3E1",
+  "theme_color": "#1B2A4A",
+  "lang": "en-IN",
+  "categories": ["education", "kids"],
+  "icons": [
+    { "src": "icons/icon_48.png",  "sizes": "48x48",   "type": "image/png" },
+    { "src": "icons/icon_72.png",  "sizes": "72x72",   "type": "image/png" },
+    { "src": "icons/icon_96.png",  "sizes": "96x96",   "type": "image/png" },
+    { "src": "icons/icon_144.png", "sizes": "144x144", "type": "image/png" },
+    { "src": "icons/icon_192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon_512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon_512_maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
