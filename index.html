@@ -314,6 +314,7 @@ const state = {
   progress: { geography: 40, history: 25, mathematics: 60, gk: 15 },
   tutorMessages: [],
   tutorLoading: false,
+  subjectAsk: {}, // per-subject inline Q&A: { geography: {q,a,loading}, ... }
   voiceListening: false,
   autoSpeak: false,
   voiceSupport: { stt: false, tts: false },
@@ -752,6 +753,21 @@ function renderHome(){
 }
 
 /* ---------- Geography ---------- */
+function renderAskBox(subjectId, subjectLabel){
+  const s = state.subjectAsk[subjectId] || {q:'', a:'', loading:false};
+  return `
+  <div class="card" style="margin-top:18px;">
+    <strong style="font-family:'Fraunces',serif;">Ask about ${subjectLabel}</strong>
+    <p class="hint mt8">Type a question about this subject and get a simple explanation, right here.</p>
+    <div class="chat-input-row" style="margin-top:10px;">
+      <input id="subjectAskInput-${subjectId}" type="text" placeholder="e.g. Why does the moon change shape?" ${s.loading?'disabled':''}>
+      <button class="btn btn-primary btn-sm" data-subject-ask-send="${subjectId}" ${s.loading?'disabled':''}>Ask</button>
+    </div>
+    ${s.loading ? `<div class="msg bot" style="margin-top:10px;"><div class="typing"><span></span><span></span><span></span></div></div>` : ''}
+    ${(!s.loading && s.a) ? `<div class="msg bot" style="margin-top:10px;">${s.a}</div>` : ''}
+  </div>`;
+}
+
 function renderGeography(){
   const tab = state.geoTab || 'world';
   const dataMap = { world: WORLD_FACTS, india: INDIA_FACTS, physical: PHYSICAL_FACTS };
@@ -821,6 +837,7 @@ function renderGeography(){
     <div class="fact-pop ${sel && facts[sel] ? 'show':''}" id="geoFact">
       ${sel && facts[sel] ? `<h4 style="font-size:15px;">${sel}</h4><p class="hint mt8" style="font-size:13.5px; color:var(--text);">${facts[sel]}</p>` : ''}
     </div>
+    ${renderAskBox('geography','Geography')}
   </div>`;
 }
 
@@ -847,6 +864,7 @@ function renderHistory(){
         </div>`;
       }).join('')}
     </div>
+    ${renderAskBox('history','History')}
   </div>`;
 }
 
@@ -885,6 +903,7 @@ function renderMath(){
         <button class="link-btn mt8" data-practice="${i}">${pIndex[i] ? 'Hide solution' : 'Show solution'}</button>
         ${pIndex[i] ? `<ol class="steps-list mt12">${p.steps.map(s=>`<li>${s}</li>`).join('')}</ol>` : ''}
       </div>`).join('')}
+    ${renderAskBox('mathematics','Mathematics')}
   </div>`;
 }
 
@@ -912,6 +931,7 @@ function renderGK(){
           <div style="font-size:13.5px; color:var(--text-soft);">${g.a}</div>
         </div>`).join('')}
     </div>
+    ${renderAskBox('gk','General Knowledge')}
   </div>`;
 }
 
@@ -1175,6 +1195,36 @@ function bindEvents(){
     if(scroll) scroll.scrollTop = scroll.scrollHeight;
   }
   if(tutorSend) tutorSend.onclick = sendTutorMsg;
+
+  document.querySelectorAll('[data-subject-ask-send]').forEach(btn=>{
+    btn.onclick = async () => {
+      const id = btn.dataset.subjectAskSend;
+      const input = document.getElementById('subjectAskInput-'+id);
+      const val = input.value.trim();
+      if(!val) return;
+      const subjectLabels = { geography:'Geography', history:'History', mathematics:'Mathematics', gk:'General Knowledge' };
+      state.subjectAsk[id] = { q: val, a: '', loading: true };
+      render();
+      try{
+        const text = await callClaude([{ role:'user', content: val }], {
+          system: `You are a warm, patient personal tutor for a ${GRADE_LABELS[state.user.grade]} Indian student. Answer only about ${subjectLabels[id] || id} topics, simply, with short paragraphs and everyday examples.`
+        });
+        state.subjectAsk[id] = { q: val, a: text || "I couldn't quite work that out — try rephrasing?", loading: false };
+      }catch(err){
+        state.subjectAsk[id] = { q: val, a: 'I could not reach the tutor engine. Please check your connection and try again.', loading: false };
+      }
+      render();
+    };
+  });
+  document.querySelectorAll('input[id^="subjectAskInput-"]').forEach(inp=>{
+    inp.onkeydown = (e) => {
+      if(e.key === 'Enter'){
+        const id = inp.id.replace('subjectAskInput-','');
+        const btn = document.querySelector(`[data-subject-ask-send="${id}"]`);
+        if(btn) btn.click();
+      }
+    };
+  });
   if(tutorInput) tutorInput.onkeydown = (e) => { if(e.key==='Enter') sendTutorMsg(); };
 
   const micBtn = document.getElementById('micBtn');
